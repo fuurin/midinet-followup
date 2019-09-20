@@ -36,8 +36,11 @@ def grid_plot(ppr, bar_range=None, pitch_range='auto', beats_in_bar=4, beat_reso
         ax.set_xlim(*xlim)
         
         if pitch_range == 'auto':
-            low, high = ppr.tracks[a].get_active_pitch_range()
-            ax.set_ylim(max(0, low - 6), min(high + 6, 128))
+            try:
+                low, high = ppr.tracks[a].get_active_pitch_range()
+            except ValueError:
+                low, high = 66, 66
+            ax.set_ylim(max(0, low - 6), min(high + 6, 127))
         elif pitch_range:
             pr = np.array(pitch_range)
             if pr.ndim == 1:
