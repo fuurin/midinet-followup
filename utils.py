@@ -4,7 +4,11 @@ from pylab import rcParams
 from pypianoroll import Multitrack, Track
 
 
-def grid_plot(ppr, bar_range=None, pitch_range='auto', beats_in_bar=4, beat_resolution=24, figsize=[21, 10]):
+def grid_plot(ppr, 
+        bar_range=None, pitch_range='auto', 
+        beats_in_bar=4, beat_resolution=24, 
+        show_white_key_ticks=False, figsize=[21, 10]
+    ):
     """
     pretty ploting for pypianoroll
     """
@@ -12,7 +16,8 @@ def grid_plot(ppr, bar_range=None, pitch_range='auto', beats_in_bar=4, beat_reso
     rcParams['figure.figsize'] = figsize
     
     if isinstance(ppr, Track):
-        ppr = Multitrack(tracks=[ppr], downbeat=list(range(ppr.pianoroll.shape[0])), beat_resolution=beat_resolution)
+        downbeat = list(range(ppr.pianoroll.shape[0]))
+        ppr = Multitrack(tracks=[ppr], downbeat=downbeat, beat_resolution=beat_resolution)
     
     beat_res = ppr.beat_resolution
     bar_res = beats_in_bar * beat_res
@@ -20,6 +25,7 @@ def grid_plot(ppr, bar_range=None, pitch_range='auto', beats_in_bar=4, beat_reso
     ppr.downbeat = np.zeros_like(ppr.downbeat, dtype=bool)
     
     major_scale = [0, 2, 4, 5, 7, 9, 11]
+    major_scale_name = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
     major_color = ['red', 'orange', 'yellow', 'green', 'cyan', 'mediumblue', 'magenta']
     major = list(zip(major_scale, major_color))
     
@@ -29,6 +35,13 @@ def grid_plot(ppr, bar_range=None, pitch_range='auto', beats_in_bar=4, beat_reso
         ax.xaxis.set_ticks_position('none')
         ax.set_xticklabels([], minor=True)
         ax.set_xticklabels(range(len(ppr.downbeat) // beat_res), minor=False)
+        
+        # pretty_midiに合わせてC-1を0とする
+        if show_white_key_ticks:
+            ax.set_yticks([k+12*i for i in range(11) for k in major_scale][:75])
+            ax.set_yticklabels([k+str(i-1) for i in range(11) for k in major_scale_name][:75])
+        else:
+            ax.set_yticklabels([f'C{i - 1}' for i in range(11)])
         
         xlim = ax.get_xlim()
         if bar_range:
