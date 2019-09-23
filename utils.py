@@ -103,3 +103,4 @@ class Timer():
     def __exit__(self, _1, _2, _3):
         end = time.time() - self.start
         print(self.fmt.format(end))
+
