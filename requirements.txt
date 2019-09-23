@@ -6,6 +6,7 @@ decorator==4.4.0
 defusedxml==0.6.0
 entrypoints==0.3
 future==0.17.1
+ipdb==0.12.2
 ipykernel==5.1.2
 ipython==7.8.0
 ipython-genutils==0.2.0
@@ -36,6 +37,7 @@ pretty-midi==0.2.8
 prometheus-client==0.7.1
 prompt-toolkit==2.0.9
 ptyprocess==0.6.0
+pydub==0.23.1
 pyFluidSynth==1.2.5
 Pygments==2.4.2
 pyparsing==2.4.2
