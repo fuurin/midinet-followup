@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from pypianoroll import Multitrack
 
 class Processor(metaclass=ABCMeta):
     """
@@ -37,3 +38,13 @@ class SequentialProcessor(Processor, metaclass=ABCMeta):
         どのようにデータを扱うかはサブクラスへ委譲する
         """
         raise NotImplementedError()
+
+class PypianorollProcessor(SequentialProcessor):
+    """
+    pypianoroll.Multitrackと渡されたdataに対して順次処理を行う
+    """
+    def __call__(self, ppr, data):
+        if not isinstance(ppr, Multitrack): ppr = Multitrack(ppr)
+        for processor in self.processors:
+            ppr, data = processor(ppr, data)
+        return ppr, data

@@ -1,7 +1,11 @@
-import numpy as np
+import os, platform, numpy as np
 import matplotlib.pyplot as plt
 from pylab import rcParams
 from pypianoroll import Multitrack, Track
+from IPython.display import Audio
+from scipy.io import wavfile as spw
+from pydub import AudioSegment as AS
+
 
 
 def grid_plot(ppr, 
@@ -76,6 +80,58 @@ def grid_plot(ppr,
     ppr.downbeat = downbeat
     
     rcParams['figure.figsize'] = orgSize
+
+
+def soundfont():
+    soundfont = ""
+    pf = platform.system()
+    # ubuntu
+    if pf == 'Linux':
+        soundfont = "../gsfont/gsfont.sf2"
+    # mac
+    if pf == 'Darwin':
+        soundfont = "./data/GeneralUser_GS_v1.471.sf2"
+    return soundfont
+
+def pm_to_wave(pm, wave_file_name, sf_path, fs=44100):
+    
+    audio = pm.fluidsynth(fs, sf_path)
+    
+    # 16bit=2byte符号付き整数に変換してノーマライズ [-32768  ~ 32767]
+    audio = np.array(audio * 32767.0, dtype="int16") # floatだと情報量が多くなる
+    audio_stereo = np.c_[audio, audio] # ステレオ化
+    spw.write(wave_file_name, fs, audio_stereo) # 書き出し
+    
+    return audio
+
+def create_audio(ppr, save_dir, song_name, tempo=120, save_npy=True, save_midi=True, convert_mp3=True):
+    wave_file_path = os.path.join(save_dir, f"{song_name}.wav")
+    pm = ppr.to_pretty_midi(constant_tempo=tempo)
+    audio = pm_to_wave(pm, wave_file_path, soundfont())
+
+    print("wave file length:", len(audio))
+    print("wave file saved to", wave_file_path)
+    
+    if save_npy:
+        npy_path = os.path.join(save_dir, f'{song_name}.npy')
+        np.save(npy_path, ppr)
+        print(f"{song_name}.npy saved!")
+
+    if save_midi:
+        midi_path = os.path.join(save_dir, f'{song_name}.midi')
+        ppr.write(midi_path)
+        print(f"{song_name}.midi file saved!")
+    
+    if convert_mp3:
+        sound = AS.from_wav(wave_file_path)
+        mp3_file_path = f"{wave_file_path[:-4]}.mp3"
+        sound.export(mp3_file_path, format="mp3")
+        os.remove(wave_file_path)
+        print("The wave file is replaced to", mp3_file_path, '\n')
+    else:
+        return Audio(wave_file_path)
+
+    return Audio(mp3_file_path)
 
 
 import time
