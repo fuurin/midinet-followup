@@ -1,5 +1,6 @@
-import os, platform, numpy as np
+import os, glob, platform, time, numpy as np
 import matplotlib.pyplot as plt
+import torch
 from pylab import rcParams
 from pypianoroll import Multitrack, Track
 from IPython.display import Audio
@@ -104,10 +105,10 @@ def pm_to_wave(pm, wave_file_name, sf_path, fs=44100):
     
     return audio
 
-def create_audio(ppr, save_dir, song_name, tempo=120, save_npy=True, save_midi=True, convert_mp3=True):
+def create_audio(ppr, save_dir, song_name, sfpath=soundfont(), tempo=120, save_npy=True, save_midi=True, convert_mp3=True):
     wave_file_path = os.path.join(save_dir, f"{song_name}.wav")
     pm = ppr.to_pretty_midi(constant_tempo=tempo)
-    audio = pm_to_wave(pm, wave_file_path, soundfont())
+    audio = pm_to_wave(pm, wave_file_path, sfpath)
 
     print("wave file length:", len(audio))
     print("wave file saved to", wave_file_path)
@@ -132,6 +133,29 @@ def create_audio(ppr, save_dir, song_name, tempo=120, save_npy=True, save_midi=T
         return Audio(wave_file_path)
 
     return Audio(mp3_file_path)
+
+
+def get_model(model_class, search_dir, pitch_range=64, device="cpu"):
+    model_paths = glob.glob(os.path.join(search_dir, "netG_epoch=*"))
+    model_paths.sort()
+    if len(model_paths) > 1:
+        print(f"{len(model_paths)} models found in {search_dir}")
+        for i, path in enumerate(model_paths):
+            print(f"{i}: {path.split('/')[-1]}")
+        model_path = model_paths[int(input("input the number of model:"))]
+    else:
+        model_path = model_paths[0]
+    print(f"model is loaded from {model_path.split('/')[-1]}")
+    
+    nz = int(model_path.split("/")[-1].split("_")[2].split("=")[1])
+    
+    model = model_class(nz=nz, pitch_range=pitch_range)
+    
+    if not isinstance(device, torch.device):
+        device = torch.device(device)
+    
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    return model
 
 
 import time
