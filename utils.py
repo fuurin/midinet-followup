@@ -105,7 +105,8 @@ def pm_to_wave(pm, wave_file_name, sf_path, fs=44100):
     
     return audio
 
-def create_audio(ppr, save_dir, song_name, sfpath=soundfont(), tempo=120, save_npy=True, save_midi=True, convert_mp3=True):
+def ppr_to_audio(ppr, save_dir, sfpath=soundfont(), tempo=120, save_npy=False, save_midi=True, convert_mp3=True):
+    song_name = ppr.name
     wave_file_path = os.path.join(save_dir, f"{song_name}.wav")
     pm = ppr.to_pretty_midi(constant_tempo=tempo)
     audio = pm_to_wave(pm, wave_file_path, sfpath)
@@ -135,8 +136,8 @@ def create_audio(ppr, save_dir, song_name, sfpath=soundfont(), tempo=120, save_n
     return Audio(mp3_file_path)
 
 
-def get_model(model_class, search_dir, pitch_range=64, device="cpu"):
-    model_paths = glob.glob(os.path.join(search_dir, "netG_epoch=*"))
+def get_model(search_dir, model_class, prefix="netG_epoch=", pitch_range=64, device="cpu"):
+    model_paths = glob.glob(os.path.join(search_dir, f"{prefix}*"))
     model_paths.sort()
     if len(model_paths) > 1:
         print(f"{len(model_paths)} models found in {search_dir}")
@@ -157,6 +158,33 @@ def get_model(model_class, search_dir, pitch_range=64, device="cpu"):
     model.load_state_dict(torch.load(model_path, map_location=device))
     return model
 
+def get_sample(search_dir, fmt='mp3'):
+    sound_paths = glob.glob(os.path.join(search_dir, f"*.{fmt}"))
+    sound_paths.sort()
+    if len(sound_paths) > 1:
+        print(f"{len(sound_paths)} sounds found in {search_dir}")
+        for i, path in enumerate(sound_paths):
+            print(f"{i}: {path.split('/')[-1]}")
+        idx = input("input the number of sound(empty for the last):") or -1
+        sound_path = sound_paths[int(idx)]
+    elif sound_paths:
+        sound_path = sound_paths[0]
+    else:
+        print(f"no sound file found in {search_dir}")
+        return (None, None)
+
+    print(f"sound is loaded from {sound_path}")
+
+    song_name = sound_path.split('/')[-1].split('.')[0]
+    midi_path = os.path.join(search_dir, f'{song_name}.midi')
+    if os.path.exists(midi_path):
+        ppr = Multitrack(midi_path)
+        print(f"midi is loaded from {midi_path}")
+        return (Audio(sound_path), ppr)
+    else:
+        print(f"failed to load midi from {midi_path}")
+        return (Audio(sound_path), None)
+    
 
 import time
 class Timer():
