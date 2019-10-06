@@ -184,6 +184,23 @@ def get_sample(search_dir, fmt='mp3'):
     else:
         print(f"failed to load midi from {midi_path}")
         return (Audio(sound_path), None)
+
+def on_chord_rate(ppr):
+    melody = ppr.tracks[0].pianoroll
+    chord = ppr.tracks[1].pianoroll
+    melody_steps, melody_pitches = np.where(melody)
+    chord_steps, chord_pitches = np.where(chord)
+    melody_pitches = melody_pitches % 12
+    chord_pitches = chord_pitches % 12
+
+    on_chord_note_num = 0
+    for step, key in zip(melody_steps, melody_pitches):
+        chord_keys = chord_pitches[np.where(chord_steps == step)[0]]
+        if key in chord_keys:
+            on_chord_note_num += 1
+
+    return on_chord_note_num / len(melody_pitches)
+
     
 
 import time
