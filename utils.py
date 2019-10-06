@@ -194,12 +194,19 @@ def on_chord_rate(ppr):
     chord_pitches = chord_pitches % 12
 
     on_chord_note_num = 0
+    off_chord_note_num = 0
     for step, key in zip(melody_steps, melody_pitches):
         chord_keys = chord_pitches[np.where(chord_steps == step)[0]]
-        if key in chord_keys:
-            on_chord_note_num += 1
-
-    return on_chord_note_num / len(melody_pitches)
+        if chord_keys.any():
+            if key in chord_keys:
+                on_chord_note_num += 1
+            else:
+                off_chord_note_num += 1
+        
+    if on_chord_note_num + off_chord_note_num < 1:
+        return np.nan
+        
+    return on_chord_note_num / (on_chord_note_num + off_chord_note_num)
 
     
 
