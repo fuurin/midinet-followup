@@ -148,9 +148,9 @@ def get_model(search_dir, model_class, prefix="netG_epoch=", pitch_range=64, dev
         model_path = model_paths[0]
     print(f"model is loaded from {model_path.split('/')[-1]}")
     
-    nz = int(model_path.split("/")[-1].split("_")[2].split("=")[1])
+    z_dim = int(model_path.split("/")[-1].split("_")[2].split("=")[1].split(".")[0])
     
-    model = model_class(nz=nz, pitch_range=pitch_range)
+    model = model_class(z_dim=z_dim, pitch_range=pitch_range)
     
     if not isinstance(device, torch.device):
         device = torch.device(device)
@@ -236,3 +236,13 @@ class Timer():
         end = time.time() - self.start
         print(self.fmt.format(end))
 
+
+def count_params(*modules, requires_grad=True):
+    param_nums = []
+    for module in modules:
+        for param in module.parameters():
+            if param.requires_grad and requires_grad:
+                param_nums.append(param.numel())
+    return sum(param_nums)
+
+                  
