@@ -222,8 +222,8 @@ class Timer():
         # このようにformatを指定することもできる
     
     """
-    def __init__(self, fmt='{:f}'):
-        self.fmt = fmt
+    def __init__(self, name="Timer"):
+        self.fmt = name + ': {:f}'
     
     def get_time():
         return time.time() - self.start
