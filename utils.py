@@ -136,7 +136,7 @@ def ppr_to_audio(ppr, save_dir, sfpath=soundfont(), tempo=120, save_npy=False, s
     return Audio(mp3_file_path)
 
 
-def get_model(search_dir, model_class, prefix="netG_epoch=", pitch_range=64, device="cpu"):
+def get_model(search_dir, model_class, prefix="G_epoch=", pitch_range=64, device="cpu"):
     model_paths = glob.glob(os.path.join(search_dir, f"{prefix}*"))
     model_paths.sort()
     if len(model_paths) > 1:
