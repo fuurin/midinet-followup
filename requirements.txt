@@ -39,7 +39,7 @@ prompt-toolkit==2.0.9
 ptyprocess==0.6.0
 pydub==0.23.1
 pyFluidSynth==1.2.5
-Pygments==2.4.2
+Pygments==2.7.4
 pyparsing==2.4.2
 pypianoroll==0.5.0
 pyrsistent==0.15.4
